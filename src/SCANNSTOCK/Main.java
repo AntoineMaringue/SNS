@@ -1,18 +1,5 @@
 package SCANNSTOCK;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.Map.Entry;
-
-import API.IParseur;
-import API.ParseurJSON;
-import DAO.Base;
-import DAO.IBase;
-
 public class Main
 {
 	
@@ -51,7 +38,5 @@ public class Main
 		  	
 		  	
 	    }	*/
-		IBase base = Base.getInstance();
-		base.connection();
 	}
 }

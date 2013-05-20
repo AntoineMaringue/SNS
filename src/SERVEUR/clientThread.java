@@ -4,12 +4,14 @@
  */
 package SERVEUR;
 
+import SERVEUR.Traitement;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.Socket;
+import java.util.Collection;
 
 /**
  *
@@ -25,6 +27,7 @@ import java.net.Socket;
     private final clientThread[] threads;
     private int maxClientsCount;
     private String isbn;
+    private Collection<String> sites;
 
     public clientThread()
     {
@@ -60,10 +63,29 @@ import java.net.Socket;
             /**
              * Boucle jusqu'a envoi du ISBN per le téléphone
              */
+            
+            boolean lstSite = false;
             while (true) 
             {
+                String dataClient = br.readLine();
+                if(dataClient.contains("lstSite"))
+                {
+                    //Récupération de la liste des sites
+                    Traitement t = new Traitement();
+                    sites = t.getListSites();
+                    //Transmission au client
+                    for (String site : sites) 
+                    {
+                        os.print(site+"\n");
+                    }
+                    //os.print("*** Fin endLst\n");
+                    lstSite = true;
+                    
+                    System.out.println("Liste des sites transmise");
+                    break;
+                }
                 os.println("Envoyer le ISBN du code à barre :\n");
-                isbn = br.readLine().trim();
+                isbn = dataClient.trim();
                 if (isbn != null) 
                 {
                     break;
@@ -71,7 +93,16 @@ import java.net.Socket;
                 else {
                     os.println("ISBN non valide, renvoyé en un autre.");
                 }
+                
+                //Si le isbn contient la chaine /quit on arrete le traitement
+                if (dataClient.contains("/quit")) 
+                {
+                    break;
+                }
             }
+            
+            if(!lstSite)
+            {
 
             /* ISBN OK */
             os.println("ISBN reçue par le serveur : " + isbn
@@ -108,20 +139,38 @@ import java.net.Socket;
                         for (int i = 0; i < maxClientsCount; i++) {
                             if (threads[i] != null && threads[i].isbn != null) 
                             {
+                                boolean searchInfos = false;
+                                boolean insertProduct = false;
+                                Traitement t = new Traitement(isbn);
+
                                 //Traitement du ISBN envoyé par le serveur
                                 System.out.println("Traitement du ISBN envoyé par le serveur");
+
+
                                 //Recherche des informations du produit
-                                    //Message renvoyé au téléphone TROUVE ou NON
+                                //Message renvoyé au téléphone TROUVE ou NON
                                 System.out.println("Recherche des informations du produit");
-                                //Création du produit
+                                searchInfos = t.searchInfos();
+
+                                threads[i].os.println("Infos sur le produit trouvée : " + searchInfos + "");
+
+                                if (searchInfos) {
+                                    //Création du produit
                                     //Message renvoyé au téléphone CREATION AUTO ou PASSAGE FORM SITE
-                                System.out.println("Création de l'entitée produit");
-                                //Insertion dans la base
+                                    System.out.println("Création de l'entitée produit");
+                                    //Insertion dans la base
                                     //Message renvoyé au téléphone Si CREATION AUTO --> INSERTION OK | KO
-                                System.out.println("Insertion dans la base");
-                                
+                                    System.out.println("Insertion dans la base");
+                                    insertProduct = t.insertToBdd();
+
+                                    threads[i].os.println("Insertion dans la base : " + insertProduct + "");
+
+                                } else {
+                                    threads[i].os.println("Le produit scanné n'a pas été trouvé par l'api google, "
+                                            + "merci d'insérer le produit via l'interface web ! ");
+                                }
                                 //Message renvoyé au téléphone                               
-                                threads[i].os.println("*"+isbn+"*");                                
+                                //threads[i].os.println("*"+isbn+"*");                                
                                 //this.os.println("(" + isbn + ")");
                             }
                         }
@@ -160,6 +209,8 @@ import java.net.Socket;
                         threads[i] = null;
                     }
                 }
+            }
+            
             }
             /*
              * Fermeture des flux et du socket

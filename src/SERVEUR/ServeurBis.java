@@ -72,7 +72,7 @@ public class ServeurBis
 	{
 		
 		ScanNStock sns = new ScanNStock(isbn);
-		return sns.launch();
+		return true;// sns.launch();
 
 	}
 }
