@@ -84,6 +84,17 @@ import java.util.Collection;
                     System.out.println("Liste des sites transmise");
                     break;
                 }
+                else if(dataClient.contains("validateData"))
+                {
+                    String id = dataClient.split(";")[1];
+                    String mdp = dataClient.split(";")[2];
+                    String site = dataClient.split(";")[3];
+                    //Récupération de la liste des sites
+                    Traitement t = new Traitement();
+                    boolean ok = t.validateUserAndSite(id,mdp,site);
+                    os.println(ok);
+                    break;
+                }
                 os.println("Envoyer le ISBN du code à barre :\n");
                 isbn = dataClient.trim();
                 if (isbn != null) 
@@ -94,11 +105,7 @@ import java.util.Collection;
                     os.println("ISBN non valide, renvoyé en un autre.");
                 }
                 
-                //Si le isbn contient la chaine /quit on arrete le traitement
-                if (dataClient.contains("/quit")) 
-                {
-                    break;
-                }
+                
             }
             
             if(!lstSite)
@@ -202,24 +209,36 @@ import java.util.Collection;
 
             /*
              * Clean up.
-             */
+            
             synchronized (this) {
                 for (int i = 0; i < maxClientsCount; i++) {
                     if (threads[i] == this) {
                         threads[i] = null;
                     }
                 }
-            }
+            } */
             
             }
+            
+             /*
+             * Clean up.
+             
+            synchronized (this) {
+                for (int i = 0; i < maxClientsCount; i++) {
+                    if (threads[i] == this) {
+                        threads[i] = null;
+                    }
+                }
+            }*/
             /*
              * Fermeture des flux et du socket
              */
             
            
-            br.close();
-            os.close();
-            clientSocket.close();
+            //br.close();
+            //os.close();
+            //clientSocket.close();
+            
         } catch (IOException e) {
         }
     }

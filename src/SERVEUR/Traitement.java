@@ -4,10 +4,13 @@
  */
 package SERVEUR;
 
-//import SCANNSTOCK.ScanNStock;
+
+import API.ShoppingApi;
+import SCANNSTOCK.ScanNStock;
 import fr.sciencesu.sns.hibernate.test.BDD;
 import java.util.ArrayList;
 import java.util.Collection;
+
 
 /**
  *
@@ -18,7 +21,7 @@ public class Traitement implements Runnable
     /**
      * Les différentes fonctions permettant de faire des traitements entre serveur/bdd
      */
-  //  private ScanNStock sns;
+    private ScanNStock sns = null;
 
     /**
      * Constructeur par défaut
@@ -35,7 +38,7 @@ public class Traitement implements Runnable
      */
     public Traitement(String isbn) 
     {
-    //    sns = new ScanNStock(isbn);
+        sns = new ScanNStock(isbn);
     }    
     
     @Override
@@ -84,8 +87,7 @@ public class Traitement implements Runnable
      */
     public boolean searchInfos() 
     {
-        return false;
-        //return sns.getInfosProduct();
+        return sns.getInfosProduct();
     }
     
 
@@ -96,8 +98,20 @@ public class Traitement implements Runnable
      */
    public boolean insertToBdd() 
     {
-        return false;
-       //return sns.InsertToBase();
+        return sns.InsertToBase();
+    }
+
+    public boolean validateUserAndSite(String id, String mdp, String site) 
+    {
+        boolean b = false;
+        BDD.connection();
+        
+        //b = BDD.ValideUser(id,mdp);
+        
+        BDD.deconnection();
+        
+        return b;
+        
     }
     
 }

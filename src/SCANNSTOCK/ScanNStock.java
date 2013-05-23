@@ -11,6 +11,7 @@ public class ScanNStock implements IScanNStock
 	private static String _EAN;
 
 	private Produit produit = null;	
+    private boolean connexion;
 	
 	public ScanNStock()
 	{
@@ -25,9 +26,27 @@ public class ScanNStock implements IScanNStock
 		
 		_EAN = isbn;
 		
-                BDD.connection();
+                connection();
 	}
-
+        
+        public void connection()
+        {
+            BDD.connection();
+            connexion = true;
+            
+        }
+        
+        public void deconnexion()
+        {
+            BDD.deconnection();
+            connexion = false;
+            
+        }
+        
+        public boolean isConnected()
+        {
+            return connexion;
+        }
 
 	@Override
 	public boolean getInfosProduct() 
@@ -53,7 +72,7 @@ public class ScanNStock implements IScanNStock
                         //basePersoScanNStock.insertInto(_tableName, produit);
 		
 		//D�connection de la base
-		BDD.deconnection();
+		deconnexion();
                 //_basePersoScanNStock.deconnection();
 		
 		return b;

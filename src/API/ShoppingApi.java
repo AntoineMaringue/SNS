@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -19,22 +20,22 @@ public class ShoppingApi {
     private final static String googleUri = "https://www.googleapis.com/shopping/search/v1/public/products?key=";
     private final static String keyGoogle = "AIzaSyAc7_OzUpgYJ2tg0_XLRY2FtTpbGpL1yIU";
     private final static String countryName = "FR";
-    private String informations;
-    private Produit _produit;
+    private static String informations;
+    private static Produit _produit;
 
     public ShoppingApi() {
         informations = "";
     }
 
-    public boolean runSearchProduct(String ean) {
+    public static boolean runSearchProduct(String ean) {
         IParseur parseur = null;
         Set<Entry<String, String>> informationsProduit = null;
-
+        ean = ean.split("/")[0];
         parseur = new ParseurJSON();
         informationsProduit = parseur.getInformations(requestHttpForGoogle(ean, "JSON")).entrySet();
 
-        if (informationsProduit == null) {
-            errorProduit();
+        if (informationsProduit.isEmpty()) 
+        {
             return false;
         } else {
             createProduit(informationsProduit);
@@ -44,7 +45,7 @@ public class ShoppingApi {
 
     }
 
-    private void createProduit(Set<Entry<String, String>> informationsProduit) {
+    private static void createProduit(Set<Entry<String, String>> informationsProduit) {
         //Affichage des donnees parsee
         for (Entry<String, String> en : informationsProduit) {
             String cle = en.getKey();
@@ -62,33 +63,40 @@ public class ShoppingApi {
                     _produit.setNom(valeur);
                     break;
                 case "modificationTime":
-                    _produit.setDdp(toCalendar(valeur, "yyyy/mm/dd"));
+                    _produit.setDdp(toCalendar(valeur.split("T")[0], "yyyy/mm/dd"));
                     break;
                 case "creationTime":
-                    _produit.setDluo(toCalendar(valeur, "yyyy/mm/dd"));
+                    _produit.setDluo(toCalendar(valeur.split("T")[0], "yyyy/mm/dd"));
                     break;
                 case "description":
                     _produit.setDescription(valeur);
-                case "prix":
+                    break;
+                case "price":
                     _produit.setPrix(Double.parseDouble(valeur));
+                    break;
+                case "unite":
+                    _produit.setUnite(valeur);
+                    break;
+                case "contenance":
+                    _produit.setContenance(Double.parseDouble(valeur));
                     break;
             }
         }
     }
 
-    private void errorProduit() {
+    private  static void errorProduit() {
         //RETOURNER UNE ERREUR SI LE PRODUIT RECHERCHE NE RETOURNE AUCUN RESULTAT
     }
 
-    public Produit getProduit() {
+    public static Produit getProduit() {
         return _produit;
     }
 
-    public String getInformations() {
+    public static String getInformations() {
         return informations;
     }
 
-    private String requestHttpForGoogle(String EAN, String format) {
+    private static String requestHttpForGoogle(String EAN, String format) {
         HttpURLConnection connection = null;
         BufferedReader serverResponse = null;
 
@@ -99,7 +107,7 @@ public class ShoppingApi {
                 + "&country=" + countryName //France
                 + "&q=" + EAN               //code produit
                 + "&maxResults=1"           //1 seul résultat
-                + "&restrictBy=gin=" + EAN  //seulement ce produit la
+                //+ "&restrictBy=gin=" + EAN  //seulement ce produit la
                 + "&alt=" + format;         //json
 
         try {
@@ -142,8 +150,8 @@ public class ShoppingApi {
      * @param pattern : le format que la date doit avoir pour être accepter dans la base de données
      * @return : un objet java.util.Calendar
      */
-    public Calendar toCalendar(String dateString, String pattern) {
-        try {
+    public static Calendar toCalendar(String dateString, String pattern) {
+        /*try {
             SimpleDateFormat format = new SimpleDateFormat(pattern);
             Date date = format.parse(dateString);
             Calendar calendar = Calendar.getInstance();
@@ -151,6 +159,18 @@ public class ShoppingApi {
             return calendar;
         } catch (ParseException e) {
             throw new IllegalArgumentException(e);
-        }
-    }
+        }*/Calendar cal=Calendar.getInstance();
+        try {  
+            DateFormat formatter ; 
+            Date date ; 
+             formatter = new SimpleDateFormat("yyyy-mm-dd");
+             date = (Date)formatter.parse(dateString); 
+            
+            cal.setTime(date);
+            
+        }catch(ParseException e)
+        {
+            
+            
+        }return cal;}
 }
