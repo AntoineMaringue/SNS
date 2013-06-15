@@ -22,13 +22,14 @@ public class Traitement implements Runnable
      * Les différentes fonctions permettant de faire des traitements entre serveur/bdd
      */
     private ScanNStock sns = null;
+    boolean finish;
 
     /**
      * Constructeur par défaut
      */
     public Traitement() 
     {
-        
+        finish = false;
     }     
 
     /**
@@ -39,6 +40,7 @@ public class Traitement implements Runnable
     public Traitement(String isbn) 
     {
         sns = new ScanNStock(isbn);
+        finish = false;
     }    
     
     @Override
@@ -63,19 +65,24 @@ public class Traitement implements Runnable
         //Création de la requéte
         //Site unsite = new Site();
         //unsite.setId(1);
-        BDD.CreateSite("name1", "pays1", "region1", "dep1");
-        BDD.CreateSite("name2", "pays1", "region1", "dep1");
-        BDD.CreateSite("name3", "pays1", "region1", "dep1");
-        BDD.CreateSite("name4", "pays1", "region1", "dep1");
         
-        String lstSite = BDD.ReadSites("SiteGeographique");
+        BDD.CreateAssociation("Association1", "adresse", "CP", "VILLE", "TEL", "MAIL");
+        BDD.CreateAssociation("Association2", "adresse", "CP", "VILLE", "TEL", "MAIL");
+        //BDD.CreateSite("name1", "pays1", "region1", "dep1");
+        //BDD.CreateSite("name2", "pays1", "region1", "dep1");
+        //BDD.CreateSite("name3", "pays1", "region1", "dep1");
+        //BDD.CreateSite("name4", "pays1", "region1", "dep1");
+        
+        String lstSite = BDD.ReadAssociation("Association");
         //incorporation des données de la bdd dans la collection temporaitre
         for (String string : lstSite.split("\n")) {
             col.add(string);
         }
         
         //Déconnexion de la base
-        BDD.deconnection();        
+        BDD.deconnection(); 
+        
+        finish = true;
         
         return col;
     }

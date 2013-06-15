@@ -8,6 +8,7 @@ public class ScanNStock implements IScanNStock
 {
 	
 	private ShoppingApi _shop;
+
 	private static String _EAN;
 
 	private Produit produit = null;	
@@ -22,7 +23,7 @@ public class ScanNStock implements IScanNStock
 	
 	public ScanNStock(String isbn)
 	{
-		_shop = new ShoppingApi();	
+		_shop = new ShoppingApi();
 		
 		_EAN = isbn;
 		
@@ -64,7 +65,7 @@ public class ScanNStock implements IScanNStock
 	@Override
 	public boolean InsertToBase() 
 	{
-		boolean b = false;                
+		boolean b = true;                
                 
 		
 		//Insertion des valeurs dans la base
@@ -82,4 +83,6 @@ public class ScanNStock implements IScanNStock
         {
 		return _EAN;
 	}
+        
+        
 }

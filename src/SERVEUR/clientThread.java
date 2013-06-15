@@ -10,6 +10,7 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Collection;
 
@@ -17,8 +18,7 @@ import java.util.Collection;
  *
  * @author Antoine
  */
- class clientThread extends Thread 
- {
+class clientThread extends Thread {
 
     private String clientName = null;
     private BufferedReader br = null;
@@ -29,22 +29,18 @@ import java.util.Collection;
     private String isbn;
     private Collection<String> sites;
 
-    public clientThread()
-    {
+    public clientThread() {
         this.threads = new clientThread[1];
     }
-    
-    public clientThread(Socket clientSocket, clientThread[] threads) 
-    {
+
+    public clientThread(Socket clientSocket, clientThread[] threads) {
         this.clientSocket = clientSocket;
         this.threads = threads;
         maxClientsCount = threads.length;
     }
 
-
-     @Override
-    public void run() 
-    {
+    @Override
+    public void run() {
         int maxClientsCount = this.maxClientsCount;
         clientThread[] threads = this.threads;
 
@@ -56,96 +52,86 @@ import java.util.Collection;
              */
             InputStreamReader isr = new InputStreamReader(clientSocket.getInputStream());
             br = new BufferedReader(isr);
-            
+
             os = new PrintStream(clientSocket.getOutputStream());
-            
-                        
+
+
             /**
              * Boucle jusqu'a envoi du ISBN per le téléphone
              */
-            
             boolean lstSite = false;
-            while (true) 
-            {
+            while (true ) {
                 String dataClient = br.readLine();
-                if(dataClient.contains("lstSite"))
-                {
+                if (dataClient != null && dataClient.contains("lstSite")) {
                     //Récupération de la liste des sites
                     Traitement t = new Traitement();
                     sites = t.getListSites();
                     //Transmission au client
-                    for (String site : sites) 
-                    {
-                        os.print(site+"\n");
+                    for (String site : sites) {
+                        os.print(site + "\n");
                     }
                     //os.print("*** Fin endLst\n");
                     lstSite = true;
-                    
+
                     System.out.println("Liste des sites transmise");
                     break;
-                }
-                else if(dataClient.contains("validateData"))
-                {
+                } 
+                else if (dataClient != null && dataClient.contains("validateData")) {
                     String id = dataClient.split(";")[1];
                     String mdp = dataClient.split(";")[2];
                     String site = dataClient.split(";")[3];
                     //Récupération de la liste des sites
                     Traitement t = new Traitement();
-                    boolean ok = t.validateUserAndSite(id,mdp,site);
+                    boolean ok = t.validateUserAndSite(id, mdp, site);
                     os.println(ok);
                     break;
                 }
-                os.println("Envoyer le ISBN du code à barre :\n");
-                isbn = dataClient.trim();
-                if (isbn != null) 
+                else if(dataClient != null)
                 {
-                    break;
-                }
-                else {
-                    os.println("ISBN non valide, renvoyé en un autre.");
-                }
-                
-                
-            }
-            
-            if(!lstSite)
-            {
-
-            /* ISBN OK */
-            os.println("ISBN reçue par le serveur : " + isbn
-                    + "\n");
-           
-            /* Démarrage du traitement */
-            while (true) 
-            {                  
-                System.out.println("Entrée dans le traitement");
-                /* If the message is private sent it to the given client. 
-                if (line.startsWith("@")) {
-                    String[] words = line.split("\\s", 2);
-                    if (words.length > 1 && words[1] != null) {
-                        words[1] = words[1].trim();
-                        if (!words[1].isEmpty()) {
-                            synchronized (this) {
-                                for (int i = 0; i < maxClientsCount; i++) {
-                                    if (threads[i] != null && threads[i] != this
-                                            && threads[i].clientName != null
-                                            && threads[i].clientName.equals(words[0])) {
-                                        threads[i].os.println("<" + name + "> " + words[1]);
-                                        
-                                        this.os.println(">" + name + "> " + words[1]);
-                                        break;
-                                    }
-                                }
-                            }
-                        }
+                    os.println("Envoyer le ISBN du code à barre :\n");
+                    isbn = dataClient.trim();
+                    if (isbn != null) {
+                        break;
+                    } else {
+                        os.println("ISBN non valide, renvoyé en un autre.");
                     }
-                } else {
-                    */
-                    synchronized (this) 
-                    {
+                }               
+            }
+
+            if (!lstSite) {
+
+                /* ISBN OK */
+                os.println("ISBN reçue par le serveur : " + isbn
+                        + "\n");
+
+                /* Démarrage du traitement */
+                while (true) {
+                    System.out.println("Entrée dans le traitement");
+                    /* If the message is private sent it to the given client. 
+                     if (line.startsWith("@")) {
+                     String[] words = line.split("\\s", 2);
+                     if (words.length > 1 && words[1] != null) {
+                     words[1] = words[1].trim();
+                     if (!words[1].isEmpty()) {
+                     synchronized (this) {
+                     for (int i = 0; i < maxClientsCount; i++) {
+                     if (threads[i] != null && threads[i] != this
+                     && threads[i].clientName != null
+                     && threads[i].clientName.equals(words[0])) {
+                     threads[i].os.println("<" + name + "> " + words[1]);
+                                        
+                     this.os.println(">" + name + "> " + words[1]);
+                     break;
+                     }
+                     }
+                     }
+                     }
+                     }
+                     } else {
+                     */
+                    synchronized (this) {
                         for (int i = 0; i < maxClientsCount; i++) {
-                            if (threads[i] != null && threads[i].isbn != null) 
-                            {
+                            if (threads[i] != null && threads[i].isbn != null) {
                                 boolean searchInfos = false;
                                 boolean insertProduct = false;
                                 Traitement t = new Traitement(isbn);
@@ -182,47 +168,45 @@ import java.util.Collection;
                             }
                         }
                     }
-                    
+
                     //Si le isbn contient la chaine /quit on arrete le traitement
-                    if (isbn.contains("/quit")) 
-                    {
+                    if (isbn.contains("/quit")) {
                         break;
                     }
-                //}
-            }
-            
-            /**
-             * Fin de connexion du client
-             */
-            synchronized (this) {
-                for (int i = 0; i < maxClientsCount; i++) 
-                {
-                    if (threads[i] != null && threads[i] == this
-                            && threads[i].isbn != null) 
-                    {
-                        threads[i].os.println("*** Client déconnecté !!! ***");
-                        System.out.println("Client déconnecté ...");
+                    //}
+                }
+
+                /**
+                 * Fin de connexion du client
+                 */
+                synchronized (this) {
+                    for (int i = 0; i < maxClientsCount; i++) {
+                        if (threads[i] != null && threads[i] == this
+                                && threads[i].isbn != null) {
+                            threads[i].os.println("*** Client déconnecté !!! ***");
+                            System.out.println("Client déconnecté ...");
+                            
+                        }
                     }
                 }
+                os.println("*** Fin Traitement");
+
+                /*
+                 * Clean up.
+
+                synchronized (this) {
+                    for (int i = 0; i < maxClientsCount; i++) {
+                        if (threads[i] == this) {
+                            threads[i] = null;
+                        }
+                    }
+                }*/
+
             }
-            os.println("*** Fin Traitement");
 
             /*
              * Clean up.
-            
-            synchronized (this) {
-                for (int i = 0; i < maxClientsCount; i++) {
-                    if (threads[i] == this) {
-                        threads[i] = null;
-                    }
-                }
-            } */
-            
-            }
-            
-             /*
-             * Clean up.
-             
+
             synchronized (this) {
                 for (int i = 0; i < maxClientsCount; i++) {
                     if (threads[i] == this) {
@@ -230,16 +214,36 @@ import java.util.Collection;
                     }
                 }
             }*/
+
+            /**
+             * Fin de connexion du client
+             
+            synchronized (this) {
+                for (int i = 0; i < maxClientsCount; i++) {
+                    if (threads[i] != null && threads[i] == this
+                            && threads[i].isbn != null) {
+                        threads[i].os.println("*** Client déconnecté !!! ***");
+                        System.out.println("Client déconnecté ...");
+                    }
+                }
+            }*/
+            os.println("*** Fin Traitement");
             /*
              * Fermeture des flux et du socket
              */
-            
-           
-            //br.close();
-            //os.close();
+            System.out.println("END\n");
+            os.flush();
+            br.close();
+            os.close();
             //clientSocket.close();
-            
-        } catch (IOException e) {
+
+            //InitServeur i = new InitServeur();
+            //i.connexion();
+
+        } 
+        catch (IOException e) 
+        {
+        
         }
     }
 }
