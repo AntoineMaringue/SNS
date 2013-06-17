@@ -63,13 +63,15 @@ public class ScanNStock implements IScanNStock
 	}
 
 	@Override
-	public boolean InsertToBase() 
+	public boolean InsertToBase(String idstock) 
 	{
 		boolean b = true;                
                 
 		
 		//Insertion des valeurs dans la base
 		b = BDD.Create("Produit", produit);
+                
+                BDD.UpdateProduit("Produit",produit.getNom(), "produits_stock_stocks_id", idstock);
                         //basePersoScanNStock.insertInto(_tableName, produit);
 		
 		//D�connection de la base

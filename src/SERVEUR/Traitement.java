@@ -23,6 +23,7 @@ public class Traitement implements Runnable
      */
     private ScanNStock sns = null;
     boolean finish;
+    private String idStock;
 
     /**
      * Constructeur par défaut
@@ -40,6 +41,13 @@ public class Traitement implements Runnable
     public Traitement(String isbn) 
     {
         sns = new ScanNStock(isbn);
+        finish = false;
+    }    
+    
+    public Traitement(String isbn, String idStock) 
+    {
+        sns = new ScanNStock(isbn);
+        this.idStock = idStock;
         finish = false;
     }    
     
@@ -66,8 +74,8 @@ public class Traitement implements Runnable
         //Site unsite = new Site();
         //unsite.setId(1);
         
-        BDD.CreateAssociation("Association1", "adresse", "CP", "VILLE", "TEL", "MAIL");
-        BDD.CreateAssociation("Association2", "adresse", "CP", "VILLE", "TEL", "MAIL");
+        //BDD.CreateAssociation("Association1", "adresse", "CP", "VILLE", "TEL", "MAIL");
+        //BDD.CreateAssociation("Association2", "adresse", "CP", "VILLE", "TEL", "MAIL");
         //BDD.CreateSite("name1", "pays1", "region1", "dep1");
         //BDD.CreateSite("name2", "pays1", "region1", "dep1");
         //BDD.CreateSite("name3", "pays1", "region1", "dep1");
@@ -105,7 +113,7 @@ public class Traitement implements Runnable
      */
    public boolean insertToBdd() 
     {
-        return sns.InsertToBase();
+        return sns.InsertToBase(idStock);
     }
 
     public boolean validateUserAndSite(String id, String mdp, String site) 
@@ -119,6 +127,19 @@ public class Traitement implements Runnable
         
         return b;
         
+    }
+
+    String getIdStock(String asso)
+    {
+        String idStock = "";
+        
+        BDD.connection();
+        
+        idStock = BDD.ReadAssociationWithStock("associations",asso);
+        
+        BDD.deconnection();
+        
+        return idStock;
     }
     
 }
